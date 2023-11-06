@@ -9,7 +9,11 @@ namespace RepoInspector.src.Anomalies
 {
     class QuickRepoDeleteAnomaly : BaseAnomaly
     {
+        private const string MaxTimeDifferenceInMinutesKey = "MaxTimeDifferenceInMinutes";
+
         public override string EventName => "repository";
+
+        public override string AnomalyName => "QuickRepoDeleteAnomaly";
 
         public override void Act()
         {
@@ -46,15 +50,16 @@ namespace RepoInspector.src.Anomalies
         {
             try
             {
+                var anomalySection = config.GetSection(AnomalyName);
+                int maxTimeDiff = int.Parse(anomalySection[MaxTimeDifferenceInMinutesKey]);
+
                 DateTime eventTime = DateTimeUtils.TimestampToDateTime(deleteTimestamp);
                 DateTime createdAtDateTime = DateTime.Parse(createdAt, null, DateTimeStyles.RoundtripKind);
 
                 // Calculate the time difference between the two DateTime objects.
                 TimeSpan timeDifference = eventTime - createdAtDateTime;
 
-                TimeSpan maxTimeDifference = TimeSpan.FromMinutes(10);
-
-                return timeDifference <= maxTimeDifference;
+                return timeDifference <= TimeSpan.FromMinutes(maxTimeDiff);
             }
             catch(Exception ex)
             {
