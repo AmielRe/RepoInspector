@@ -6,7 +6,12 @@ namespace RepoInspector.src.Anomalies
 {
     class TimePushAnomaly : BaseAnomaly
     {
+        private const string StartTimeConfigKey = "StartTime";
+        private const string EndTimeConfigKey = "EndTime";
+
         public override string EventName => "push";
+
+        public override string AnomalyName => "TimePushAnomaly";
 
         public override void Act()
         {
@@ -28,8 +33,10 @@ namespace RepoInspector.src.Anomalies
             try
             {
                 DateTime eventTime = DateTimeUtils.TimestampToDateTime(timestamp);
-                TimeSpan start = new TimeSpan(14, 0, 0); // 14 o'clock
-                TimeSpan end = new TimeSpan(16, 0, 0); // 16 o'clock
+
+                var anomalySection = config.GetSection(AnomalyName);
+                TimeSpan start = TimeSpan.Parse(anomalySection[StartTimeConfigKey]);
+                TimeSpan end = TimeSpan.Parse(anomalySection[EndTimeConfigKey]);
 
                 if ((eventTime.TimeOfDay > start) && (eventTime.TimeOfDay < end))
                 {

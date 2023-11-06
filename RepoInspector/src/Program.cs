@@ -12,9 +12,12 @@ namespace RepoInspector.src
     class Program
     {
         private static CancellationTokenSource source;
+        private const string SmeeURLConfigKey = "SmeeURL";
 
         static async Task Main(string[] args)
         {
+            var config = new AppConfig();
+
             // Get all types that implement the IAnomaly interface in the current assembly.
             List<Type> implementingTypes = Assembly.GetExecutingAssembly()
                 .GetTypes()
@@ -25,7 +28,7 @@ namespace RepoInspector.src
             var token = source.Token;
 
             // Static for now, we will later make it configurable
-            var smeeUri = new Uri("https://smee.io/OTddXLye7f5D5vh");
+            var smeeUri = new Uri(config.GetString(SmeeURLConfigKey));
 
             Console.ForegroundColor = ConsoleColor.DarkRed;
             Console.WriteLine(" > Hit CTRL-C in order to stop everything.");

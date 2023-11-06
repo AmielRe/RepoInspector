@@ -7,7 +7,11 @@ namespace RepoInspector.src.Anomalies
 {
     class TeamNameAnomaly : BaseAnomaly
     {
+        private const string PrefixConfigKey = "Prefix";
+
         public override string EventName => "team";
+
+        public override string AnomalyName => "TeamNameAnomaly";
 
         public override void Act()
         {
@@ -18,6 +22,9 @@ namespace RepoInspector.src.Anomalies
         {
             try
             {
+                var anomalySection = config.GetSection(AnomalyName);
+                string forbiddenPrefix = anomalySection[PrefixConfigKey];
+
                 // Deserialize the JSON into a dynamic object or JObject.
                 JObject jsonPayload = JObject.Parse(JsonConvert.SerializeObject(payload.Data.Body));
 
