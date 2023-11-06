@@ -6,6 +6,8 @@ namespace RepoInspector.src.Anomalies
 {
     class TimePushAnomaly : BaseAnomaly
     {
+        public override string EventName => "push";
+
         public override void Act()
         {
             Console.WriteLine("Suspicious push event detected!");
@@ -13,14 +15,7 @@ namespace RepoInspector.src.Anomalies
 
         public override bool IsSuspicious(SmeeEvent payload)
         {
-            string githubEvent;
-
-            if (!payload.Data.Headers.TryGetValue("x-github-event", out githubEvent))
-            {
-                return false;
-            }
-
-            if(!string.Equals(githubEvent, "push") || IsPushTimeValid(payload.Data.Timestamp))
+            if(IsPushTimeValid(payload.Data.Timestamp))
             {
                 return false;
             }
