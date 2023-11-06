@@ -25,16 +25,25 @@ namespace RepoInspector.src.Anomalies
 
         private bool IsPushTimeValid(long timestamp)
         {
-            DateTime eventTime = DateTimeUtils.TimestampToDateTime(timestamp);
-            TimeSpan start = new TimeSpan(14, 0, 0); // 14 o'clock
-            TimeSpan end = new TimeSpan(16, 0, 0); // 16 o'clock
-
-            if ((eventTime.TimeOfDay > start) && (eventTime.TimeOfDay < end))
+            try
             {
-                return false;
-            }
+                DateTime eventTime = DateTimeUtils.TimestampToDateTime(timestamp);
+                TimeSpan start = new TimeSpan(14, 0, 0); // 14 o'clock
+                TimeSpan end = new TimeSpan(16, 0, 0); // 16 o'clock
 
-            return true;
+                if ((eventTime.TimeOfDay > start) && (eventTime.TimeOfDay < end))
+                {
+                    return false;
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Handle the date parsing error.
+                Console.WriteLine($"Date parsing error: {ex.Message}");
+                return true; // Or take appropriate action.
+            }
         }
     }
 }

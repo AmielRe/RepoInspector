@@ -18,28 +18,51 @@ namespace RepoInspector.src.Anomalies
 
         public override bool IsSuspicious(SmeeEvent payload)
         {
-            // Deserialize the JSON into a dynamic object or JObject.
-            JObject jsonPayload = JObject.Parse(JsonConvert.SerializeObject(payload.Data.Body));
-
-            if (!string.Equals(jsonPayload["action"].ToString(), "deleted") || !IsDeleteTimeValid(payload.Data.Timestamp, jsonPayload["repository"]["created_at"].ToString()))
+            try
             {
-                return false;
-            }
+                // Deserialize the JSON into a dynamic object or JObject.
+                JObject jsonPayload = JObject.Parse(JsonConvert.SerializeObject(payload.Data.Body));
 
-            return true;
+                if ((jsonPayload["action"] is null) || 
+                    !string.Equals(jsonPayload["action"].ToString(), "deleted") ||
+                    (jsonPayload["repository"] is null) ||
+                    (jsonPayload["repository"]["created_at"] is null) ||
+                    !IsDeleteTimeValid(payload.Data.Timestamp, jsonPayload["repository"]["created_at"].ToString()))
+                {
+                    return false;
+                }
+
+                return true;
+            }
+            catch (JsonReaderException ex)
+            {
+                // Handle the JSON parsing error.
+                Console.WriteLine($"JSON parsing error: {ex.Message}");
+                return false; // Or take appropriate action.
+            }
         }
 
         private bool IsDeleteTimeValid(long deleteTimestamp, string createdAt)
         {
-            DateTime eventTime = DateTimeUtils.TimestampToDateTime(deleteTimestamp);
-            DateTime createdAtDateTime = DateTime.Parse(createdAt, null, DateTimeStyles.RoundtripKind);
+            try
+            {
+                DateTime eventTime = DateTimeUtils.TimestampToDateTime(deleteTimestamp);
+                DateTime createdAtDateTime = DateTime.Parse(createdAt, null, DateTimeStyles.RoundtripKind);
 
-            // Calculate the time difference between the two DateTime objects.
-            TimeSpan timeDifference = eventTime - createdAtDateTime;
+                // Calculate the time difference between the two DateTime objects.
+                TimeSpan timeDifference = eventTime - createdAtDateTime;
 
-            TimeSpan maxTimeDifference = TimeSpan.FromMinutes(10);
+                TimeSpan maxTimeDifference = TimeSpan.FromMinutes(10);
 
-            return timeDifference <= maxTimeDifference;
+                return timeDifference <= maxTimeDifference;
+            }
+            catch(Exception ex)
+            {
+                // Handle the date parsing error.
+                Console.WriteLine($"Date parsing error: {ex.Message}");
+                return true; // Or take appropriate action.
+
+            }
         }
     }
 }
