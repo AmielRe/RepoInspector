@@ -16,15 +16,28 @@ namespace RepoInspector.src.Anomalies
 
         public override bool IsSuspicious(SmeeEvent payload)
         {
-            // Deserialize the JSON into a dynamic object or JObject.
-            JObject jsonPayload = JObject.Parse(JsonConvert.SerializeObject(payload.Data.Body));
-
-            if (!string.Equals(jsonPayload["action"].ToString(), "created") || !jsonPayload["team"]["name"].ToString().ToLower().StartsWith("hacker"))
+            try
             {
-                return false;
-            }
+                // Deserialize the JSON into a dynamic object or JObject.
+                JObject jsonPayload = JObject.Parse(JsonConvert.SerializeObject(payload.Data.Body));
 
-            return true;
+                if ((jsonPayload["action"] is null) ||
+                    !string.Equals(jsonPayload["action"].ToString(), "created") ||
+                    (jsonPayload["team"] is null) ||
+                    (jsonPayload["team"]["name"] is null) ||
+                    !jsonPayload["team"]["name"].ToString().ToLower().StartsWith("hacker"))
+                {
+                    return false;
+                }
+
+                return true;
+            }
+            catch (JsonReaderException ex)
+            {
+                // Handle the JSON parsing error.
+                Console.WriteLine($"JSON parsing error: {ex.Message}");
+                return false; // Or take appropriate action.
+            }
         }
     }
 }

@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using RepoInspector.src.Anomalies;
 using Smee.IO.Client;
 
@@ -44,8 +42,16 @@ namespace RepoInspector.src
                 // Create instances of the implementing types and call the BaseFunction method.
                 foreach (Type implementingType in implementingTypes)
                 {
-                    var instance = (IAnomaly)Activator.CreateInstance(implementingType);
-                    instance.Run(smeeEvent);
+                    try
+                    {
+                        var instance = (IAnomaly)Activator.CreateInstance(implementingType);
+                        instance.Run(smeeEvent);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error creating instance of {implementingType.Name}: {ex.Message}");
+                        // Log or handle the error as needed.
+                    }
                 }
 
                 Console.ResetColor();
@@ -60,7 +66,16 @@ namespace RepoInspector.src
                 eventArgs.Cancel = true;
             };
 
-            await smeeCli.StartAsync(token);
+            try
+            {
+                await smeeCli.StartAsync(token);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Unhandled exception: {ex.Message}");
+                // Log or handle the error as needed.
+            }
+
             Console.WriteLine("Finish executing. Thank you!");
         }
     }
