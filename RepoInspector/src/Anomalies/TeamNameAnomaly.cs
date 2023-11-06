@@ -13,11 +13,19 @@ namespace RepoInspector.src.Anomalies
 
         public override string AnomalyName => "TeamNameAnomaly";
 
+        /// <summary>
+        /// This method defines the action to take when a suspicious team name anomaly is detected.
+        /// </summary>
         public override void Act()
         {
             Console.WriteLine("Suspicious team creation event detected!");
         }
 
+        /// <summary>
+        /// Determines whether a given SmeeEvent payload is suspicious.
+        /// </summary>
+        /// <param name="payload">The SmeeEvent payload to analyze.</param>
+        /// <returns>True if the event is suspicious; otherwise, false.</returns>
         public override bool IsSuspicious(SmeeEvent payload)
         {
             try
@@ -43,7 +51,7 @@ namespace RepoInspector.src.Anomalies
             {
                 // Handle the JSON parsing error.
                 Console.WriteLine($"JSON parsing error: {ex.Message}");
-                return false; // Or take appropriate action.
+                return false;
             }
         }
     }

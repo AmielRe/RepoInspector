@@ -13,11 +13,19 @@ namespace RepoInspector.src.Anomalies
 
         public override string AnomalyName => "TimePushAnomaly";
 
+        /// <summary>
+        /// This method defines the action to take when a suspicious time push anomaly is detected.
+        /// </summary>
         public override void Act()
         {
             Console.WriteLine("Suspicious push event detected!");
         }
 
+        /// <summary>
+        /// Determines whether a given SmeeEvent payload is suspicious.
+        /// </summary>
+        /// <param name="payload">The SmeeEvent payload to analyze.</param>
+        /// <returns>True if the event is suspicious; otherwise, false.</returns>
         public override bool IsSuspicious(SmeeEvent payload)
         {
             if(IsPushTimeValid(payload.Data.Timestamp))
@@ -28,6 +36,11 @@ namespace RepoInspector.src.Anomalies
             return true;
         }
 
+        /// <summary>
+        /// Checks if the timestamp of the push event falls within a specified time range.
+        /// </summary>
+        /// <param name="timestamp">The timestamp of the push event.</param>
+        /// <returns>True if the event timestamp is not within the specified range; otherwise, false.</returns>
         private bool IsPushTimeValid(long timestamp)
         {
             try
@@ -49,7 +62,7 @@ namespace RepoInspector.src.Anomalies
             {
                 // Handle the date parsing error.
                 Console.WriteLine($"Date parsing error: {ex.Message}");
-                return true; // Or take appropriate action.
+                return true;
             }
         }
     }
