@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using RepoInspector.src.Anomalies;
 using Smee.IO.Client;
 
 namespace RepoInspector.src
@@ -14,6 +17,12 @@ namespace RepoInspector.src
 
         static async Task Main(string[] args)
         {
+            // Get all types that implement the IAnomaly interface in the current assembly.
+            List<Type> implementingTypes = Assembly.GetExecutingAssembly()
+                .GetTypes()
+                .Where(type => typeof(IAnomaly).IsAssignableFrom(type) && !type.IsAbstract && !type.IsInterface)
+                .ToList();
+
             source = new CancellationTokenSource();
             var token = source.Token;
 
@@ -30,11 +39,16 @@ namespace RepoInspector.src
             smeeCli.OnDisconnect += (sender, a) => Console.WriteLine($"Disconnected from Smee.io ({smeeUri}){Environment.NewLine}");
             smeeCli.OnMessage += (sender, smeeEvent) =>
             {
-                Console.Write("Message received: ");
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
-                Console.Write(JsonConvert.SerializeObject(smeeEvent)); // This is a typed object.
+
+                // Create instances of the implementing types and call the BaseFunction method.
+                foreach (Type implementingType in implementingTypes)
+                {
+                    var instance = (IAnomaly)Activator.CreateInstance(implementingType);
+                    instance.Run(smeeEvent);
+                }
+
                 Console.ResetColor();
-                Console.WriteLine();
                 Console.WriteLine();
             };
             smeeCli.OnPing += (sender, a) => Console.WriteLine($"Ping from Smee{Environment.NewLine}");
