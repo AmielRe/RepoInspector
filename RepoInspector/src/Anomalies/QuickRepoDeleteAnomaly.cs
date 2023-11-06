@@ -9,6 +9,8 @@ namespace RepoInspector.src.Anomalies
 {
     class QuickRepoDeleteAnomaly : BaseAnomaly
     {
+        public override string EventName => "repository";
+
         public override void Act()
         {
             Console.WriteLine("Suspicious repository event detected!");
@@ -16,17 +18,10 @@ namespace RepoInspector.src.Anomalies
 
         public override bool IsSuspicious(SmeeEvent payload)
         {
-            string githubEvent;
-
-            if (!payload.Data.Headers.TryGetValue("x-github-event", out githubEvent))
-            {
-                return false;
-            }
-
             // Deserialize the JSON into a dynamic object or JObject.
             JObject jsonPayload = JObject.Parse(JsonConvert.SerializeObject(payload.Data.Body));
 
-            if (!string.Equals(githubEvent, "repository") || !string.Equals(jsonPayload["action"].ToString(), "deleted") || !IsDeleteTimeValid(payload.Data.Timestamp, jsonPayload["repository"]["created_at"].ToString()))
+            if (!string.Equals(jsonPayload["action"].ToString(), "deleted") || !IsDeleteTimeValid(payload.Data.Timestamp, jsonPayload["repository"]["created_at"].ToString()))
             {
                 return false;
             }
