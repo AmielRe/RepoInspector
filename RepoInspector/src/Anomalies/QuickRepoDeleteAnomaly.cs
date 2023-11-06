@@ -15,11 +15,19 @@ namespace RepoInspector.src.Anomalies
 
         public override string AnomalyName => "QuickRepoDeleteAnomaly";
 
+        /// <summary>
+        /// This method defines the action to take when a quick repository delete anomaly is detected.
+        /// </summary>
         public override void Act()
         {
             Console.WriteLine("Suspicious repository event detected!");
         }
 
+        /// <summary>
+        /// Determines whether a given SmeeEvent payload is suspicious.
+        /// </summary>
+        /// <param name="payload">The SmeeEvent payload to analyze.</param>
+        /// <returns>True if the event is suspicious; otherwise, false.</returns>
         public override bool IsSuspicious(SmeeEvent payload)
         {
             try
@@ -42,10 +50,16 @@ namespace RepoInspector.src.Anomalies
             {
                 // Handle the JSON parsing error.
                 Console.WriteLine($"JSON parsing error: {ex.Message}");
-                return false; // Or take appropriate action.
+                return false;
             }
         }
 
+        /// <summary>
+        /// Checks if the time difference between the event and creation of a repository is within the specified limit.
+        /// </summary>
+        /// <param name="deleteTimestamp">The timestamp of the delete event.</param>
+        /// <param name="createdAt">The creation timestamp of the repository.</param>
+        /// <returns>True if the time difference is within the limit; otherwise, false.</returns>
         private bool IsDeleteTimeValid(long deleteTimestamp, string createdAt)
         {
             try
@@ -65,7 +79,7 @@ namespace RepoInspector.src.Anomalies
             {
                 // Handle the date parsing error.
                 Console.WriteLine($"Date parsing error: {ex.Message}");
-                return true; // Or take appropriate action.
+                return true;
 
             }
         }

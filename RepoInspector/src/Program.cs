@@ -14,6 +14,10 @@ namespace RepoInspector.src
         private static CancellationTokenSource source;
         private const string SmeeURLConfigKey = "SmeeURL";
 
+        /// <summary>
+        /// Main entry point of the RepoInspector application.
+        /// </summary>
+        /// <param name="args">Command-line arguments (not used).</param>
         static async Task Main(string[] args)
         {
             var config = new AppConfig();
@@ -27,7 +31,6 @@ namespace RepoInspector.src
             source = new CancellationTokenSource();
             var token = source.Token;
 
-            // Static for now, we will later make it configurable
             var smeeUri = new Uri(config.GetString(SmeeURLConfigKey));
 
             Console.ForegroundColor = ConsoleColor.DarkRed;
@@ -42,7 +45,7 @@ namespace RepoInspector.src
             {
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
 
-                // Create instances of the implementing types and call the BaseFunction method.
+                // Create instances of the implementing types and call the Run method.
                 foreach (Type implementingType in implementingTypes)
                 {
                     try
