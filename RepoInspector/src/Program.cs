@@ -30,11 +30,14 @@ namespace RepoInspector.src
 
             var smeeUri = new Uri(config.GetString(SmeeURLConfigKey));
 
+            // Set console text color to green for information messages
             Console.ForegroundColor = ConsoleColor.Green;
             Logger.Info(" > Hit CTRL-C in order to stop everything.");
             Console.ResetColor();
 
             var smeeClient = new SmeeClient(smeeUri);
+
+            // Set up event handlers for Smee.io interactions
             SetupSmeeEventHandlers(smeeUri, smeeClient, implementingTypes);
 
             Console.CancelKeyPress += (sender, eventArgs) =>
@@ -58,14 +61,25 @@ namespace RepoInspector.src
             Console.ResetColor();
         }
 
+        /// <summary>
+        /// Retrieves a list of types that implement the IAnomaly interface within the current assembly.
+        /// </summary>
+        /// <returns>A list of types representing anomaly detection implementations.</returns>
         private static List<Type> GetImplementingAnomalies()
         {
+            // Get all types in the current assembly that implement the IAnomaly interface and are not abstract or interfaces.
             return Assembly.GetExecutingAssembly()
                 .GetTypes()
                 .Where(type => typeof(IAnomaly).IsAssignableFrom(type) && !type.IsAbstract && !type.IsInterface)
                 .ToList();
         }
 
+        /// <summary>
+        /// Sets up event handlers for the SmeeClient to handle connection, disconnection, messages, and errors.
+        /// </summary>
+        /// <param name="smeeUri">The URI of the Smee.io service being connected to.</param>
+        /// <param name="smeeClient">The SmeeClient instance for which event handlers are being set up.</param>
+        /// <param name="implementingTypes">A list of types implementing the IAnomaly interface for anomaly detection.</param>
         private static void SetupSmeeEventHandlers(Uri smeeUri, SmeeClient smeeClient, List<Type> implementingTypes)
         {
             smeeClient.OnConnect += (sender, a) => Logger.Info($"Connected to Smee.io ({smeeUri.AbsoluteUri})");
@@ -74,6 +88,7 @@ namespace RepoInspector.src
             {
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
 
+                // Iterate through implementing types to detect anomalies
                 foreach (Type implementingType in implementingTypes)
                 {
                     try
@@ -83,13 +98,12 @@ namespace RepoInspector.src
                     }
                     catch (Exception ex)
                     {
-                        // Log exception
+                        // Log exceptions that occur while detecting anomalies
                         Logger.Error(ex);
                     }
                 }
 
                 Console.ResetColor();
-                Console.WriteLine();
             };
             smeeClient.OnPing += (sender, a) => Logger.Info("Ping from Smee");
             smeeClient.OnError += (sender, e) => Logger.Error(e);
