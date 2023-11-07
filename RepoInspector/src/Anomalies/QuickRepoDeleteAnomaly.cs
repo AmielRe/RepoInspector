@@ -70,8 +70,11 @@ namespace RepoInspector.src.Anomalies
                 DateTime eventTime = DateTimeUtils.TimestampToDateTime(deleteTimestamp);
                 DateTime createdAtDateTime = DateTime.Parse(createdAt, null, DateTimeStyles.RoundtripKind);
 
+                // Convert created at time to local time (to match event time)
+                DateTime createdAtLocalDateTime = DateTimeUtils.ConvertUtcToLocalTimeZone(createdAtDateTime);
+
                 // Calculate the time difference between the two DateTime objects.
-                TimeSpan timeDifference = eventTime - createdAtDateTime;
+                TimeSpan timeDifference = eventTime - createdAtLocalDateTime;
 
                 return timeDifference <= TimeSpan.FromMinutes(maxTimeDiff);
             }

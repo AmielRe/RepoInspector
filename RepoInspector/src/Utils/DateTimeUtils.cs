@@ -23,5 +23,17 @@ namespace RepoInspector.src.Utils
             DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
             return dtDateTime.AddMilliseconds(timestamp).ToLocalTime();
         }
+
+        /// <summary>
+        /// Converts a DateTime value from Coordinated Universal Time (UTC) to the local time zone.
+        /// </summary>
+        /// <param name="dateTime">A DateTime value in UTC.</param>
+        /// <returns>A DateTime value in the local time zone.</returns>
+        public static DateTime ConvertUtcToLocalTimeZone(DateTime dateTime)
+        {
+            // Specify the input DateTime as UTC, then convert it to local time.
+            DateTime specifiedDateTime = DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
+            return specifiedDateTime.ToLocalTime();
+        }
     }
 }
