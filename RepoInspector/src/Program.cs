@@ -4,13 +4,15 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using NLog;
 using RepoInspector.src.Anomalies;
 using Smee.IO.Client;
 
 namespace RepoInspector.src
 {
-    class Program
+    public class Program
     {
+        private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
         private static CancellationTokenSource source;
         private const string SmeeURLConfigKey = "SmeeURL";
 
@@ -28,9 +30,8 @@ namespace RepoInspector.src
 
             var smeeUri = new Uri(config.GetString(SmeeURLConfigKey));
 
-            Console.ForegroundColor = ConsoleColor.DarkRed;
-            Console.WriteLine(" > Hit CTRL-C in order to stop everything.");
-            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.Green;
+            Logger.Info(" > Hit CTRL-C in order to stop everything.");
             Console.ResetColor();
 
             var smeeClient = new SmeeClient(smeeUri);
@@ -48,11 +49,13 @@ namespace RepoInspector.src
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Unhandled exception: {ex.Message}");
-                // Log or handle the error as needed.
+                // Log unhandled exception
+                Logger.Error(ex);
             }
 
-            Console.WriteLine("Finish executing. Thank you!");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Logger.Info("Finish executing. Thank you!");
+            Console.ResetColor();
         }
 
         private static List<Type> GetImplementingAnomalies()
@@ -65,8 +68,8 @@ namespace RepoInspector.src
 
         private static void SetupSmeeEventHandlers(Uri smeeUri, SmeeClient smeeClient, List<Type> implementingTypes)
         {
-            smeeClient.OnConnect += (sender, a) => Console.WriteLine($"Connected to Smee.io ({smeeUri.AbsoluteUri}){Environment.NewLine}");
-            smeeClient.OnDisconnect += (sender, a) => Console.WriteLine($"Disconnected from Smee.io ({smeeUri.AbsoluteUri}){Environment.NewLine}");
+            smeeClient.OnConnect += (sender, a) => Logger.Info($"Connected to Smee.io ({smeeUri.AbsoluteUri})");
+            smeeClient.OnDisconnect += (sender, a) => Logger.Info($"Disconnected from Smee.io ({smeeUri.AbsoluteUri})");
             smeeClient.OnMessage += (sender, smeeEvent) =>
             {
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
@@ -80,16 +83,16 @@ namespace RepoInspector.src
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Error creating instance of {implementingType.Name}: {ex.Message}");
-                        // Log or handle the error as needed.
+                        // Log exception
+                        Logger.Error(ex);
                     }
                 }
 
                 Console.ResetColor();
                 Console.WriteLine();
             };
-            smeeClient.OnPing += (sender, a) => Console.WriteLine($"Ping from Smee{Environment.NewLine}");
-            smeeClient.OnError += (sender, e) => Console.WriteLine($"Error was raised ({e.GetType()}: {e.Message}{Environment.NewLine}");
+            smeeClient.OnPing += (sender, a) => Logger.Info("Ping from Smee");
+            smeeClient.OnError += (sender, e) => Logger.Error(e);
         }
     }
 }

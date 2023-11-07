@@ -1,4 +1,5 @@
-﻿using Smee.IO.Client.Dto;
+﻿using NLog;
+using Smee.IO.Client.Dto;
 
 namespace RepoInspector.src.Anomalies
 {
@@ -7,6 +8,7 @@ namespace RepoInspector.src.Anomalies
     /// </summary>
     abstract class BaseAnomaly : IAnomaly
     {
+        protected Logger Log { get; private set; }
         private const string GithubEventKey = "x-github-event";
         protected AppConfig config;
 
@@ -16,6 +18,7 @@ namespace RepoInspector.src.Anomalies
         public BaseAnomaly()
         {
             config = new AppConfig();
+            Log = LogManager.GetLogger(GetType().ToString());
         }
 
         /// <summary>
@@ -46,13 +49,16 @@ namespace RepoInspector.src.Anomalies
         /// <param name="payload">The SmeeEvent payload to analyze.</param>
         public void Run(SmeeEvent payload)
         {
+            Log.Debug($"Running {AnomalyName} anomaly...");
             if (!payload.Data.Headers.TryGetValue(GithubEventKey, out string payloadEvent)) return;
 
             if (!string.Equals(payloadEvent, EventName)) return;
 
             if(IsSuspicious(payload))
             {
+                Log.Debug($"{AnomalyName} found suspicious event, handling it now");
                 Act();
+                Log.Debug($"Finish handling {AnomalyName} suspicious event");
             }
         }
     }

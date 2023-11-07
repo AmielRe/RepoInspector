@@ -60,8 +60,8 @@ namespace RepoInspector.src.Anomalies
             }
             catch (Exception ex)
             {
-                // Handle the date parsing error.
-                Console.WriteLine($"Date parsing error: {ex.Message}");
+                // Log date parsing error and act as valid.
+                Log.Error(ex);
                 return true;
             }
         }
