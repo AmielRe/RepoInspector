@@ -29,11 +29,20 @@ namespace RepoInspector.src.Utils
         /// </summary>
         /// <param name="dateTime">A DateTime value in UTC.</param>
         /// <returns>A DateTime value in the local time zone.</returns>
+        /// <exception cref="Exception">Thrown when an error occurs during the conversion.</exception>
         public static DateTime ConvertUtcToLocalTimeZone(DateTime dateTime)
         {
-            // Specify the input DateTime as UTC, then convert it to local time.
-            DateTime specifiedDateTime = DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
-            return specifiedDateTime.ToLocalTime();
+            try
+            {
+                // Specify the input DateTime as UTC, then convert it to local time.
+                DateTime specifiedDateTime = DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
+                return specifiedDateTime.ToLocalTime();
+            }
+            catch (Exception ex)
+            {
+                // This exception will be handled by the caller
+                throw ex;
+            }
         }
     }
 }

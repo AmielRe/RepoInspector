@@ -48,8 +48,8 @@ namespace RepoInspector.src.Anomalies
             }
             catch (JsonReaderException ex)
             {
-                // Handle the JSON parsing error.
-                Console.WriteLine($"JSON parsing error: {ex.Message}");
+                // Log the JSON parsing error
+                Log.Error(ex);
                 return false;
             }
         }
@@ -73,15 +73,15 @@ namespace RepoInspector.src.Anomalies
                 // Convert created at time to local time (to match event time)
                 DateTime createdAtLocalDateTime = DateTimeUtils.ConvertUtcToLocalTimeZone(createdAtDateTime);
 
-                // Calculate the time difference between the two DateTime objects.
+                // Calculate the time difference between the two DateTime objects
                 TimeSpan timeDifference = eventTime - createdAtLocalDateTime;
 
                 return timeDifference <= TimeSpan.FromMinutes(maxTimeDiff);
             }
             catch(Exception ex)
             {
-                // Handle the date parsing error.
-                Console.WriteLine($"Date parsing error: {ex.Message}");
+                // Log date parsing error and act like valid
+                Log.Error(ex);
                 return true;
 
             }

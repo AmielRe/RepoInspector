@@ -33,7 +33,7 @@ namespace RepoInspector.src.Anomalies
                 var anomalySection = config.GetSection(AnomalyName);
                 string forbiddenPrefix = anomalySection[PrefixConfigKey];
 
-                // Deserialize the JSON into a dynamic object or JObject.
+                // Deserialize the JSON into a dynamic object or JObject
                 JObject jsonPayload = JObject.Parse(JsonConvert.SerializeObject(payload.Data.Body));
 
                 if ((jsonPayload["action"] is null) ||
@@ -49,8 +49,8 @@ namespace RepoInspector.src.Anomalies
             }
             catch (JsonReaderException ex)
             {
-                // Handle the JSON parsing error.
-                Console.WriteLine($"JSON parsing error: {ex.Message}");
+                // Log JSON parsing error
+                Log.Error(ex);
                 return false;
             }
         }
