@@ -10,6 +10,18 @@ namespace RepoInspector.src.Anomalies
     /// </summary>
     interface IAnomaly
     {
+        /// <summary>
+        /// Validates the JSON payload of a SmeeEvent for correctness and required fields.
+        /// </summary>
+        /// <param name="payload">The SmeeEvent payload to validate.</param>
+        /// <returns>
+        ///   <c>true</c> if the JSON payload is valid; otherwise, <c>false</c>.
+        /// </returns>
+        /// <remarks>
+        ///   This method performs checks to ensure the provided JSON payload is in the expected format
+        ///   and contains the necessary fields. If the payload is valid, it returns <c>true</c>;
+        ///   otherwise, it returns <c>false</c>.
+        /// </remarks>
         public bool IsJsonPayloadValid(SmeeEvent payload);
 
         /// <summary>

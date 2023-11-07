@@ -89,6 +89,18 @@ namespace RepoInspector.src.Anomalies
             return int.Parse(anomalySection[MaxTimeDifferenceInMinutesKey]);
         }
 
+        /// <summary>
+        /// Checks whether the JSON payload in a SmeeEvent is valid and contains the expected fields.
+        /// </summary>
+        /// <param name="payload">The SmeeEvent payload to be validated.</param>
+        /// <returns>
+        ///   <c>true</c> if the JSON payload contains the expected fields; otherwise, <c>false</c>.
+        /// </returns>
+        /// <remarks>
+        ///   This method deserializes the JSON payload from a SmeeEvent into a dynamic object or JObject
+        ///   and checks whether it contains the necessary fields: "action," "repository," and "repository.created_at."
+        ///   If any of these fields are missing or null, the payload is considered invalid.
+        /// </remarks>
         public override bool IsJsonPayloadValid(SmeeEvent payload)
         {
             // Deserialize the JSON into a dynamic object or JObject.

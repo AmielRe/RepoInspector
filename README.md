@@ -59,6 +59,12 @@ In order to run the application locally, change the property "SmeeURL" with your
 }
 ```
 
+In addition, add environment variable locally with the secret used for the webhook:
+
+```bash
+setx GITHUB_SECRET "<your_secret_string>"
+```
+
 ## Usage
 
 Run the application using the following command in command-line:
@@ -67,13 +73,16 @@ Run the application using the following command in command-line:
 dotnet run
 ```
 
-Add webhook in your Github organization and in the "Payload URL" write the Smee.io Proxy URL (Same from the configuration file).
+Add webhook in your Github organization:
+
+- In the "Payload URL" write the Smee.io Proxy URL (Same from the configuration file).
+- In the "Secret" write your secret string (must be matched with the "GITHUB_SECRET" environment variable set before).
 
 Currently, the app supports 3 anomalies for:
 
-- Team Creation
-- Repository Deletion
-- Push Event
+- Pushing code between 14:00-16:00
+- Creating a team with the prefix “hacker”
+- Creating a repository and deleting it in less than 10 minutes
 
 ## Authors
 
