@@ -10,6 +10,8 @@ namespace RepoInspector.src.Anomalies
     /// </summary>
     interface IAnomaly
     {
+        public bool IsJsonPayloadValid(SmeeEvent payload);
+
         /// <summary>
         /// Determines whether a given SmeeEvent payload is suspicious and should trigger the action.
         /// </summary>
