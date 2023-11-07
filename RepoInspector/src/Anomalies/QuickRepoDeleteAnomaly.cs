@@ -35,10 +35,7 @@ namespace RepoInspector.src.Anomalies
                 // Deserialize the JSON into a dynamic object or JObject.
                 JObject jsonPayload = JObject.Parse(JsonConvert.SerializeObject(payload.Data.Body));
 
-                if ((jsonPayload["action"] is null) || 
-                    !string.Equals(jsonPayload["action"].ToString(), "deleted") ||
-                    (jsonPayload["repository"] is null) ||
-                    (jsonPayload["repository"]["created_at"] is null) ||
+                if (!string.Equals(jsonPayload["action"].ToString(), "deleted") ||
                     !IsDeleteTimeValid(payload.Data.Timestamp, jsonPayload["repository"]["created_at"].ToString()))
                 {
                     return false;
@@ -64,8 +61,7 @@ namespace RepoInspector.src.Anomalies
         {
             try
             {
-                var anomalySection = config.GetSection(AnomalyName);
-                int maxTimeDiff = int.Parse(anomalySection[MaxTimeDifferenceInMinutesKey]);
+                int maxTimeDiff = GetMaxTimeDifference();
 
                 DateTime eventTime = DateTimeUtils.TimestampToDateTime(deleteTimestamp);
                 DateTime createdAtDateTime = DateTime.Parse(createdAt, null, DateTimeStyles.RoundtripKind);
@@ -85,6 +81,22 @@ namespace RepoInspector.src.Anomalies
                 return true;
 
             }
+        }
+
+        private int GetMaxTimeDifference()
+        {
+            var anomalySection = config.GetSection(AnomalyName);
+            return int.Parse(anomalySection[MaxTimeDifferenceInMinutesKey]);
+        }
+
+        public override bool IsJsonPayloadValid(SmeeEvent payload)
+        {
+            // Deserialize the JSON into a dynamic object or JObject.
+            JObject jsonPayload = JObject.Parse(JsonConvert.SerializeObject(payload.Data.Body));
+
+            return !(jsonPayload["action"] is null) ||
+                    !(jsonPayload["repository"] is null) ||
+                    !(jsonPayload["repository"]["created_at"] is null);
         }
     }
 }

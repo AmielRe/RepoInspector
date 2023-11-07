@@ -54,6 +54,8 @@ namespace RepoInspector.src.Anomalies
 
             if (!string.Equals(payloadEvent, EventName)) return;
 
+            if (!IsJsonPayloadValid(payload)) return;
+
             if(IsSuspicious(payload))
             {
                 Log.Debug($"{AnomalyName} found suspicious event, handling it now");
@@ -61,5 +63,7 @@ namespace RepoInspector.src.Anomalies
                 Log.Debug($"Finish handling {AnomalyName} suspicious event");
             }
         }
+
+        public abstract bool IsJsonPayloadValid(SmeeEvent payload);
     }
 }
