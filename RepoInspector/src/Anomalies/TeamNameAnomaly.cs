@@ -21,6 +21,16 @@ namespace RepoInspector.src.Anomalies
             Console.WriteLine("Suspicious team creation event detected!");
         }
 
+        public override bool IsJsonPayloadValid(SmeeEvent payload)
+        {
+            // Deserialize the JSON into a dynamic object or JObject.
+            JObject jsonPayload = JObject.Parse(JsonConvert.SerializeObject(payload.Data.Body));
+
+            return !(jsonPayload["action"] is null) ||
+                    !(jsonPayload["team"] is null) ||
+                    !(jsonPayload["team"]["name"] is null);
+        }
+
         /// <summary>
         /// Determines whether a given SmeeEvent payload is suspicious.
         /// </summary>
@@ -36,11 +46,8 @@ namespace RepoInspector.src.Anomalies
                 // Deserialize the JSON into a dynamic object or JObject
                 JObject jsonPayload = JObject.Parse(JsonConvert.SerializeObject(payload.Data.Body));
 
-                if ((jsonPayload["action"] is null) ||
-                    !string.Equals(jsonPayload["action"].ToString(), "created") ||
-                    (jsonPayload["team"] is null) ||
-                    (jsonPayload["team"]["name"] is null) ||
-                    !jsonPayload["team"]["name"].ToString().ToLower().StartsWith("hacker"))
+                if (!string.Equals(jsonPayload["action"].ToString(), "created") ||
+                    !jsonPayload["team"]["name"].ToString().ToLower().StartsWith(forbiddenPrefix))
                 {
                     return false;
                 }

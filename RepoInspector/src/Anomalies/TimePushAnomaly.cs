@@ -21,6 +21,12 @@ namespace RepoInspector.src.Anomalies
             Console.WriteLine("Suspicious push event detected!");
         }
 
+        public override bool IsJsonPayloadValid(SmeeEvent payload)
+        {
+            // Nothing to verify here, just timestamp required
+            return true;
+        }
+
         /// <summary>
         /// Determines whether a given SmeeEvent payload is suspicious.
         /// </summary>
