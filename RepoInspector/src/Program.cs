@@ -21,12 +21,7 @@ namespace RepoInspector.src
         static async Task Main(string[] args)
         {
             var config = new AppConfig();
-
-            // Get all types that implement the IAnomaly interface in the current assembly.
-            List<Type> implementingTypes = Assembly.GetExecutingAssembly()
-                .GetTypes()
-                .Where(type => typeof(IAnomaly).IsAssignableFrom(type) && !type.IsAbstract && !type.IsInterface)
-                .ToList();
+            List<Type> implementingTypes = GetImplementingAnomalies();
 
             source = new CancellationTokenSource();
             var token = source.Token;
@@ -38,14 +33,44 @@ namespace RepoInspector.src
             Console.WriteLine();
             Console.ResetColor();
 
-            var smeeCli = new SmeeClient(smeeUri);
-            smeeCli.OnConnect += (sender, a) => Console.WriteLine($"Connected to Smee.io ({smeeUri}){Environment.NewLine}");
-            smeeCli.OnDisconnect += (sender, a) => Console.WriteLine($"Disconnected from Smee.io ({smeeUri}){Environment.NewLine}");
-            smeeCli.OnMessage += (sender, smeeEvent) =>
+            var smeeClient = new SmeeClient(smeeUri);
+            SetupSmeeEventHandlers(smeeUri, smeeClient, implementingTypes);
+
+            Console.CancelKeyPress += (sender, eventArgs) =>
+            {
+                source.Cancel();
+                eventArgs.Cancel = true;
+            };
+
+            try
+            {
+                await smeeClient.StartAsync(token);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Unhandled exception: {ex.Message}");
+                // Log or handle the error as needed.
+            }
+
+            Console.WriteLine("Finish executing. Thank you!");
+        }
+
+        private static List<Type> GetImplementingAnomalies()
+        {
+            return Assembly.GetExecutingAssembly()
+                .GetTypes()
+                .Where(type => typeof(IAnomaly).IsAssignableFrom(type) && !type.IsAbstract && !type.IsInterface)
+                .ToList();
+        }
+
+        private static void SetupSmeeEventHandlers(Uri smeeUri, SmeeClient smeeClient, List<Type> implementingTypes)
+        {
+            smeeClient.OnConnect += (sender, a) => Console.WriteLine($"Connected to Smee.io ({smeeUri.AbsoluteUri}){Environment.NewLine}");
+            smeeClient.OnDisconnect += (sender, a) => Console.WriteLine($"Disconnected from Smee.io ({smeeUri.AbsoluteUri}){Environment.NewLine}");
+            smeeClient.OnMessage += (sender, smeeEvent) =>
             {
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
 
-                // Create instances of the implementing types and call the Run method.
                 foreach (Type implementingType in implementingTypes)
                 {
                     try
@@ -63,26 +88,8 @@ namespace RepoInspector.src
                 Console.ResetColor();
                 Console.WriteLine();
             };
-            smeeCli.OnPing += (sender, a) => Console.WriteLine($"Ping from Smee{Environment.NewLine}");
-            smeeCli.OnError += (sender, e) => Console.WriteLine($"Error was raised (Disconnect/Anything else: {e.Message}{Environment.NewLine}");
-
-            Console.CancelKeyPress += (sender, eventArgs) =>
-            {
-                source.Cancel();
-                eventArgs.Cancel = true;
-            };
-
-            try
-            {
-                await smeeCli.StartAsync(token);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Unhandled exception: {ex.Message}");
-                // Log or handle the error as needed.
-            }
-
-            Console.WriteLine("Finish executing. Thank you!");
+            smeeClient.OnPing += (sender, a) => Console.WriteLine($"Ping from Smee{Environment.NewLine}");
+            smeeClient.OnError += (sender, e) => Console.WriteLine($"Error was raised ({e.GetType()}: {e.Message}{Environment.NewLine}");
         }
     }
 }
